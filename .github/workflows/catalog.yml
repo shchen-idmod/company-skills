@@ -8,7 +8,7 @@ on:
       - ".claude-plugin/marketplace.json"
       - "scripts/deploy.py"
       - ".github/workflows/catalog.yml"
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 permissions:
   contents: read
