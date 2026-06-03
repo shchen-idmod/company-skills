@@ -8,7 +8,7 @@ on:
       - ".claude-plugin/marketplace.json"
       - "scripts/deploy.py"
       - ".github/workflows/catalog.yml"
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -28,10 +28,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
       - name: Validate channels (fails if a skill is misconfigured)
         run: python scripts/deploy.py --dry-run
       - name: Build catalog
-        run: python scripts/deploy.py --catalog
+        run: python scripts/deploy.py --catalog --repo-url "${{ github.server_url }}/${{ github.repository }}"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

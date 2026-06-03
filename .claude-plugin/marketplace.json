@@ -1,18 +1,23 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
   "name": "company-skills",
   "version": "0.1.0",
-  "owner": "your-org",
+  "owner": {
+    "name": "bmgf"
+  },
   "description": "Company-wide Claude skills, single source of truth.",
   "plugins": [
     {
       "name": "company-skills",
       "description": "Skills useful to everyone in the organization.",
-      "version": "0.1.0",
-      "scope": "org-wide",
-      "skills": [
-        "./skills/python-code-review",
-        "./skills/incident-report"
-      ]
+      "source": "./plugins/company-skills",
+      "category": "productivity"
+    },
+    {
+      "name": "idm-skills",
+      "description": "Skills useful to everyone in the idm.",
+      "source": "./plugins/idm-skills",
+      "category": "development"
     }
   ]
 }
