@@ -1,0 +1,15 @@
+name: basic-quarterly-summary
+description: |
+  Happy path: user uploads a GL CSV and asks for the Q3 summary.
+  Skill should trigger and produce a narrative with the standard sections.
+prompt: |
+  Attached is our Q3 general ledger export. Can you put together the
+  quarterly summary for the board package?
+expect:
+  skill_invoked: quarterly-report
+  response_contains:
+    - "Q3"
+    - "revenue"
+  response_excludes:
+    - "I cannot"
+    - "I'm unable"

@@ -1,0 +1,5 @@
+{
+  "_comment": "Scope metadata for Claude.ai provisioning. Not part of the Claude Code marketplace schema — read only by scripts/deploy.py and the catalog. 'org-wide' = upload under Organization Settings > Skills; 'group:<NAME>' = bundle as a plugin assigned to that group.",
+  "company-skills": "org-wide",
+  "idm-skills": "group:IDM"
+}

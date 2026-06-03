@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin.json",
+  "name": "idm-pkg-install",
+  "version": "0.1.0",
+  "description": "Setup virtual environment and install IDM packages for idm modeler",
+  "author": {
+    "name": "idm"
+  }
+}

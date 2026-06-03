@@ -1,0 +1,4 @@
+# Dependencies for the deploy/catalog tooling (scripts/deploy.py).
+# PyYAML is used to parse SKILL.md frontmatter correctly, including
+# multi-line block scalars (description: |) and quoted values.
+PyYAML>=6.0

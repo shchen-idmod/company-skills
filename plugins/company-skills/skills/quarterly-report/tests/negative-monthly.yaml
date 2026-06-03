@@ -1,0 +1,8 @@
+name: negative-monthly-close
+description: |
+  Negative case: user asks about monthly close, not quarterly.
+  Skill must NOT trigger — it's explicitly scoped to quarter-end deliverables.
+prompt: |
+  Can you help me reconcile last month's bank statement against the GL?
+expect:
+  skill_invoked: null   # explicitly no skill invocation expected
