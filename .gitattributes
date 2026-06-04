@@ -1,0 +1,18 @@
+# Normalize all text files to LF in the repo and on checkout.
+# This overrides each developer's core.autocrlf setting, so line endings
+# stay consistent across Windows/macOS/Linux and Git stops warning about
+# "LF will be replaced by CRLF". All tracked files here are plain text.
+* text=auto eol=lf
+
+# Be explicit for the file types in this repo.
+*.md    text eol=lf
+*.json  text eol=lf
+*.yaml  text eol=lf
+*.yml   text eol=lf
+*.py    text eol=lf
+*.txt   text eol=lf
+
+# If Windows-only scripts are added later, force CRLF for them:
+# *.bat  text eol=crlf
+# *.cmd  text eol=crlf
+# *.ps1  text eol=crlf

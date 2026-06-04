@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin.json",
-  "name": "company-skills",
+  "name": "bmgf-company-skills",
   "version": "0.1.0",
   "description": "Skills useful to everyone in the organization.",
   "author": {

@@ -8,9 +8,9 @@
   "description": "Company-wide Claude skills, single source of truth.",
   "plugins": [
     {
-      "name": "company-skills",
+      "name": "bmgf-company-skills",
       "description": "Skills useful to everyone in the organization.",
-      "source": "./plugins/company-skills",
+      "source": "./plugins/bmgf-company-skills",
       "category": "productivity"
     },
     {
