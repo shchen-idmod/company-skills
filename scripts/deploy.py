@@ -242,6 +242,9 @@ def build_catalog(dry_run: bool, repo_url: str | None = None) -> DeployResult:
             meta = read_frontmatter(sdir)
             desc = meta.get("description", "(no description)")
 
+            skill_md_rel = (sdir / "SKILL.md").relative_to(ROOT).as_posix()
+            skill_md_href = _html_escape(file_link(skill_md_rel))
+
             files = list_bundled_files(sdir)
             files_html = ""
             if files:
@@ -257,7 +260,8 @@ def build_catalog(dry_run: bool, repo_url: str | None = None) -> DeployResult:
                 )
 
             rows.append(
-                f'<div class="skill"><div class="skill-name">{_html_escape(sname)}</div>'
+                f'<div class="skill"><div class="skill-name">{_html_escape(sname)}'
+                f'<a class="skill-md" href="{skill_md_href}">SKILL.md</a></div>'
                 f'<div class="skill-desc">{_html_escape(desc)}</div>'
                 f'{files_html}</div>'
             )
@@ -288,7 +292,12 @@ def build_catalog(dry_run: bool, repo_url: str | None = None) -> DeployResult:
             padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:.04em; }}
   .plugin-desc {{ color:var(--muted); margin:8px 0 16px; }}
   .skill {{ border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin:8px 0; }}
-  .skill-name {{ font-weight:600; font-family:ui-monospace,Consolas,monospace; }}
+  .skill-name {{ font-weight:600; font-family:ui-monospace,Consolas,monospace;
+                 display:flex; align-items:center; gap:10px; }}
+  .skill-md {{ font-weight:600; font-size:12px; color:var(--accent);
+               text-decoration:none; border:1px solid var(--accent);
+               padding:1px 7px; border-radius:10px; }}
+  .skill-md:hover {{ background:var(--accent); color:#fff; }}
   .skill-desc {{ color:var(--muted); font-size:14px; margin-top:4px; }}
   .files {{ margin-top:10px; padding-top:8px; border-top:1px dashed var(--line); }}
   .files-label {{ font-size:12px; font-weight:600; color:var(--muted);
