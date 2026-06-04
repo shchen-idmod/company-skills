@@ -6,7 +6,7 @@ description: |
   environment from a GitHub repo or local path, running pip install or conda install against an
   IDM codebase, resolving dependency conflicts in scientific Python environments, or any request
   like 'install emodpy', 'install this repo', 'set up the environment for', or 'get this running'.
-  Use this skill before writing any install commands — it determines the correct source, strategy,
+  Use this skill before writing any install commands - it determines the correct source, strategy,
   and mode based on what the user wants.
 argument-hint: "[pypi|github-url|local-path] [dev|prod|requirements]"
 allowed-tools: Bash, Read, Edit, Glob, Grep
@@ -18,14 +18,14 @@ This skill installs IDM packages from three possible sources: **PyPI** (released
 
 ---
 
-## Decision 1 — Install source
+## Decision 1 - Install source
 
 If not already specified, ask the user:
 
 > "Where should I install from?
-> 1. **PyPI** — install a released version by package name (e.g. `emodpy==2.1.0`)
-> 2. **GitHub repo** — clone and install from a GitHub URL
-> 3. **Local path** — install from a directory on this machine (default: current directory)"
+> 1. **PyPI** - install a released version by package name (e.g. `emodpy==2.1.0`)
+> 2. **GitHub repo** - clone and install from a GitHub URL
+> 3. **Local path** - install from a directory on this machine (default: current directory)"
 
 | Source | When to use | Goes to |
 |--------|-------------|---------|
@@ -35,27 +35,27 @@ If not already specified, ask the user:
 
 ---
 
-## Decision 2 — Install mode (repo and local sources only)
+## Decision 2 - Install mode (repo and local sources only)
 
-Not applicable for PyPI — a PyPI install always installs a fixed release into site-packages.
+Not applicable for PyPI - a PyPI install always installs a fixed release into site-packages.
 
 For GitHub and local sources, three modes are available:
 
 | Mode | Command | When to use |
 |------|---------|-------------|
-| **Dev** (editable) | `pip install -e .` | Actively modifying the package — changes reflect immediately |
-| **Prod** (standard) | `pip install .` | Using the package as a consumer — installs a fixed copy from local source |
-| **Requirements** | `pip install -r requirements.txt` | Repo has no installable package (no `pyproject.toml`/`setup.py`) — only dependencies |
+| **Dev** (editable) | `pip install -e .` | Actively modifying the package - changes reflect immediately |
+| **Prod** (standard) | `pip install .` | Using the package as a consumer - installs a fixed copy from local source |
+| **Requirements** | `pip install -r requirements.txt` | Repo has no installable package (no `pyproject.toml`/`setup.py`) - only dependencies |
 
-**Dev** and **Prod** both install from **local source on disk** — neither downloads from PyPI. The `.` means "this directory." To install from PyPI use `pip install <package-name>` with no `.` (see PyPI section below).
+**Dev** and **Prod** both install from **local source on disk** - neither downloads from PyPI. The `.` means "this directory." To install from PyPI use `pip install <package-name>` with no `.` (see PyPI section below).
 
 **When to ask vs. auto-detect:**
 
-- If the user passed the mode as an argument (`dev`, `prod`, or `requirements`), use it directly — do not ask.
+- If the user passed the mode as an argument (`dev`, `prod`, or `requirements`), use it directly - do not ask.
 - Otherwise, **defer the question until after repo inspection** ([Step 1](#step-1)). Once you know what files exist:
-  - If only `requirements.txt` is present (no `pyproject.toml`, no `setup.py`/`setup.cfg`) → **auto-select `requirements` mode**, no prompt needed.
-  - If an installable package is present → ask: *"Should I do a **dev install** (editable, `pip install -e .`) or a **prod install** (standard, `pip install .`)?"*
-  - If both an installable package AND a `requirements.txt` are present and you're unsure → offer all three options.
+  - If only `requirements.txt` is present (no `pyproject.toml`, no `setup.py`/`setup.cfg`) -> **auto-select `requirements` mode**, no prompt needed.
+  - If an installable package is present -> ask: *"Should I do a **dev install** (editable, `pip install -e .`) or a **prod install** (standard, `pip install .`)?"*
+  - If both an installable package AND a `requirements.txt` are present and you're unsure -> offer all three options.
 
 Apply the chosen mode consistently across all install commands in the session.
 
@@ -102,7 +102,7 @@ pip index versions emodpy 2>/dev/null \
 
 | Package pattern | Source |
 |---|---|
-| `dtk-*` (legacy) | IDM internal Artifactory — requires IDM network access |
+| `dtk-*` (legacy) | IDM internal Artifactory - requires IDM network access |
 | Unreleased branches / forks | GitHub URL install (see below) |
 
 If the user asks for a package that isn't on PyPI, redirect to the GitHub repo or local path workflow.
@@ -118,26 +118,26 @@ python -c "import emodpy; print(emodpy.__version__)"
 
 ## Install from GitHub repo or local path {#main-workflow}
 
-### Step 0 — Resolve the repo path
+### Step 0 - Resolve the repo path
 
 ```bash
-# Local path — use as-is
+# Local path - use as-is
 REPO=/path/to/repo
 
-# GitHub URL — clone first
+# GitHub URL - clone first
 git clone https://github.com/InstituteforDiseaseModeling/emodpy /tmp/idm-repo
 REPO=/tmp/idm-repo
 
 # Specific branch or tag
 git clone --branch v2.1.0 https://github.com/org/repo /tmp/idm-repo
 
-# No path given — use current directory
+# No path given - use current directory
 REPO=$(pwd)
 ```
 
 ---
 
-### Step 1 — Inspect the repo before doing anything {#step-1}
+### Step 1 - Inspect the repo before doing anything {#step-1}
 
 Read these files in order. Stop at the first one that exists and contains install instructions; use the others to fill in gaps.
 
@@ -157,7 +157,7 @@ ls $REPO/setup.py \
 
 ---
 
-### Step 2 — Choose the install strategy
+### Step 2 - Choose the install strategy
 
 Priority order when multiple files exist: `pyproject.toml` > `setup.py/setup.cfg` > `environment.yml` > `requirements.txt` > manual.
 
@@ -168,7 +168,7 @@ Priority order when multiple files exist: `pyproject.toml` > `setup.py/setup.cfg
 | `environment.yml` | Conda environment |
 | `requirements.txt` | Pip dependencies only |
 | `Makefile` with `install` target | Makefile-driven |
-| None of the above | Script collection — infer deps manually |
+| None of the above | Script collection - infer deps manually |
 
 ---
 
@@ -232,7 +232,7 @@ pip install . --break-system-packages
 pip install ".[test]" --break-system-packages      # with extras
 ```
 
-> ⚠️ Never run `python setup.py install` — deprecated; bypasses pip's resolver and can silently corrupt environments.
+> [!] Never run `python setup.py install` - deprecated; bypasses pip's resolver and can silently corrupt environments.
 
 ---
 
@@ -261,7 +261,7 @@ If multiple environment files exist (`environment-dev.yml`, `environment-gpu.yml
 
 ### Strategy: requirements.txt
 
-For script-level repos with no installable package. This is the **`requirements` mode** from [Decision 2](#decision-2--install-mode-repo-and-local-sources-only) — auto-selected when no `pyproject.toml` / `setup.py` is present, or chosen explicitly by the user.
+For script-level repos with no installable package. This is the **`requirements` mode** from [Decision 2](#decision-2--install-mode-repo-and-local-sources-only) - auto-selected when no `pyproject.toml` / `setup.py` is present, or chosen explicitly by the user.
 
 ```bash
 cd $REPO
@@ -272,7 +272,7 @@ pip install -r requirements.txt --break-system-packages
 pip install -r requirements.txt -r requirements-dev.txt --break-system-packages
 ```
 
-Dev/prod does not apply here — there is no installable package, only dependencies. If the repo *does* have an installable package but the user explicitly asked for `requirements` mode, install only the listed dependencies and skip `pip install .` / `pip install -e .`.
+Dev/prod does not apply here - there is no installable package, only dependencies. If the repo *does* have an installable package but the user explicitly asked for `requirements` mode, install only the listed dependencies and skip `pip install .` / `pip install -e .`.
 
 ---
 
@@ -299,7 +299,7 @@ pip install -r /tmp/inferred_requirements.txt --break-system-packages
 
 ---
 
-### Step 3 — Environment isolation (MANDATORY — never skip)
+### Step 3 - Environment isolation (MANDATORY - never skip)
 
 **Do not run any install command until an isolated environment is created and activated.** Installing into the system Python or an uncontrolled environment risks corrupting other projects and is not permitted by this skill.
 
@@ -311,16 +311,16 @@ If the user has not specified an environment, ask before proceeding:
 grep -E 'python_requires|python >=|python==' \
   $REPO/pyproject.toml $REPO/setup.py $REPO/setup.cfg $REPO/environment.yml 2>/dev/null
 
-# Option A — venv (lightweight, no conda needed)
+# Option A - venv (lightweight, no conda needed)
 python -m venv $REPO/.venv
 source $REPO/.venv/bin/activate       # Linux/macOS
 # $REPO\.venv\Scripts\activate        # Windows
 
-# Option B — conda (when environment.yml present or C extensions needed)
+# Option B - conda (when environment.yml present or C extensions needed)
 conda create -n idm-env python=3.9
 conda activate idm-env
 
-# Option C — use the repo's own environment.yml directly (see conda strategy above)
+# Option C - use the repo's own environment.yml directly (see conda strategy above)
 conda env create -f $REPO/environment.yml
 conda activate $(grep '^name:' $REPO/environment.yml | awk '{print $2}')
 ```
@@ -332,18 +332,18 @@ which python    # should point inside .venv or the conda env, not system Python
 
 ---
 
-### Step 4 — Check for IDM-internal packages
+### Step 4 - Check for IDM-internal packages
 
 ```bash
 grep -E 'git\+|artifactory|idm-bamboo|idm\.local' \
   requirements*.txt setup.py pyproject.toml 2>/dev/null
 ```
 
-If found, flag to the user before proceeding — these require IDM network access or credentials.
+If found, flag to the user before proceeding - these require IDM network access or credentials.
 
 ---
 
-### Step 5 — Verify the installation
+### Step 5 - Verify the installation
 
 ```bash
 python -c "import <package_name>; print(<package_name>.__version__)"
@@ -351,7 +351,7 @@ python -c "import <package_name>; print(<package_name>.__version__)"
 pytest tests/ -x -q 2>/dev/null \
   || python -m pytest tests/ -x -q 2>/dev/null \
   || make test 2>/dev/null \
-  || echo "No test runner found — manual check only"
+  || echo "No test runner found - manual check only"
 ```
 
 ---
@@ -381,15 +381,15 @@ pytest tests/ -x -q 2>/dev/null \
 4. Verify with `pip show` and a quick import.
 
 **GitHub / local source:**
-1. Resolve path — clone if GitHub URL, default to `pwd` if nothing given.
+1. Resolve path - clone if GitHub URL, default to `pwd` if nothing given.
 2. **Create and activate an isolated environment (mandatory).** Ask: venv or conda? Never skip.
-3. Inspect the repo — README + install files.
-4. Pick strategy — `pyproject.toml` > `setup.py` > `environment.yml` > `requirements.txt` > manual.
+3. Inspect the repo - README + install files.
+4. Pick strategy - `pyproject.toml` > `setup.py` > `environment.yml` > `requirements.txt` > manual.
 5. Confirm install mode based on what was found:
-   - Mode was passed as an argument → use it.
-   - Only `requirements.txt` found → auto-select `requirements`, no prompt.
-   - Installable package found → ask `dev` (`-e .`) vs `prod` (`.`).
-6. Check for IDM-internal packages — flag if Artifactory/SSH needed.
+   - Mode was passed as an argument -> use it.
+   - Only `requirements.txt` found -> auto-select `requirements`, no prompt.
+   - Installable package found -> ask `dev` (`-e .`) vs `prod` (`.`).
+6. Check for IDM-internal packages - flag if Artifactory/SSH needed.
 7. Run the install using the chosen strategy and mode.
-8. Verify — import the package and run any available tests.
-9. Report — source, strategy, mode, environment, and any caveats.
+8. Verify - import the package and run any available tests.
+9. Report - source, strategy, mode, environment, and any caveats.

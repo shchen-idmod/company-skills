@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-aggregate.py — collapses a GL CSV into quarterly line items.
+aggregate.py - collapses a GL CSV into quarterly line items.
 
 Deterministic. Same input, same output, every time. Skills should push
 this kind of logic into scripts rather than describing it in prose:
@@ -17,7 +17,7 @@ import sys
 from collections import defaultdict
 from datetime import date
 
-# Account-range → category mapping. Mirror of references/gl-schema.md.
+# Account-range -> category mapping. Mirror of references/gl-schema.md.
 CATEGORY_RANGES = [
     (4000, 4999, "revenue"),
     (5000, 5999, "cost_of_revenue"),

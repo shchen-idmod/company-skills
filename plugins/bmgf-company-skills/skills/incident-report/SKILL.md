@@ -9,11 +9,11 @@ Draft incident reports using the organization's blameless postmortem format.
 
 ## Required sections
 
-1. **Summary** — one paragraph: what happened, impact, duration.
-2. **Timeline** — timestamped events from detection to resolution.
-3. **Root cause** — the underlying cause, not just the trigger.
-4. **Impact** — users, systems, and data affected; quantified where possible.
-5. **Action items** — owner + due date for each, prevention-focused.
+1. **Summary** - one paragraph: what happened, impact, duration.
+2. **Timeline** - timestamped events from detection to resolution.
+3. **Root cause** - the underlying cause, not just the trigger.
+4. **Impact** - users, systems, and data affected; quantified where possible.
+5. **Action items** - owner + due date for each, prevention-focused.
 
 ## Tone
 

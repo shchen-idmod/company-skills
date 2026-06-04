@@ -13,18 +13,18 @@ metadata:
 You are a Python code reviewer. Your job is to run quick pattern-based checks
 on Python files and produce a structured REVIEW.md report.
 
-> **Companion skill:** The `REVIEW.md` produced here is consumed by `python-code-fixer` in Standalone Mode. Do not rename the file, change the finding ID format (`CR-NN` / `WR-NN` / `IN-NN`), or omit the `**File:**` / `**Issue:**` / `**Fix:**` fields — the fixer's parser depends on them.
+> **Companion skill:** The `REVIEW.md` produced here is consumed by `python-code-fixer` in Standalone Mode. Do not rename the file, change the finding ID format (`CR-NN` / `WR-NN` / `IN-NN`), or omit the `**File:**` / `**Issue:**` / `**Fix:**` fields - the fixer's parser depends on them.
 
 > **Cross-platform note:** Prefer the Claude Code `Grep` and `Glob` tools over shelling out to `grep`/`find`/`rg`. POSIX `find` is unavailable on Windows PowerShell, and the Grep tool is faster than per-file shell loops on every platform.
 
-## Step 1 — Find files to review
+## Step 1 - Find files to review
 
-First, get Python files changed vs main (works on every platform — `git` is platform-neutral):
+First, get Python files changed vs main (works on every platform - `git` is platform-neutral):
 ```
 git diff main...HEAD --name-only -- '*.py'
 ```
 
-If no git diff is available (e.g. user passed a path, or HEAD is on main), enumerate `.py` files using the **Glob tool** with the pattern `**/*.py` rooted at the target path. Do **not** shell out to `find` — it is unavailable on Windows.
+If no git diff is available (e.g. user passed a path, or HEAD is on main), enumerate `.py` files using the **Glob tool** with the pattern `**/*.py` rooted at the target path. Do **not** shell out to `find` - it is unavailable on Windows.
 
 **Always exclude these noisy directories from the review set** (generated, vendored, or environment-managed):
 - `.git/`, `venv/`, `.venv/`, `env/`, `.env/`
@@ -35,9 +35,9 @@ If no git diff is available (e.g. user passed a path, or HEAD is on main), enume
 
 If after filtering no files remain, write REVIEW.md with `status: skipped` and stop.
 
-## Step 2 — Run pattern checks across the review set
+## Step 2 - Run pattern checks across the review set
 
-Run each check **once across all in-scope files** using the Claude Code `Grep` tool with `glob: "**/*.py"`, `output_mode: "content"`, and `-n: true`. Do **not** loop per file — that is O(files × patterns) and slow.
+Run each check **once across all in-scope files** using the Claude Code `Grep` tool with `glob: "**/*.py"`, `output_mode: "content"`, and `-n: true`. Do **not** loop per file - that is O(files x patterns) and slow.
 
 After each Grep call, filter out hits from the directories excluded in Step 1 before classifying them.
 
@@ -55,12 +55,12 @@ After each Grep call, filter out hits from the directories excluded in Step 1 be
 
 **Known false positives to suppress before classifying:**
 - Pattern 1: lines beginning with `#` (comments like `# password = "..."`)
-- Pattern 5 `print(`: skip if the file is a CLI/script entrypoint — detect via `if __name__ == "__main__":` in the file, or a shebang on line 1
+- Pattern 5 `print(`: skip if the file is a CLI/script entrypoint - detect via `if __name__ == "__main__":` in the file, or a shebang on line 1
 - Pattern 5 TODO/FIXME: do not flag lines suffixed with `# noqa` or `# pragma: no cover`
 - Pattern 8: skip stdlib-shadowed names like `webbrowser.open(`, `socket.open(`, `os.open(`
-- Patterns 2/3 inside test files (path matches `test_*.py`, `*_test.py`, or any segment named `tests/`) are usually fine — flag only if the test would be unreliable
+- Patterns 2/3 inside test files (path matches `test_*.py`, `*_test.py`, or any segment named `tests/`) are usually fine - flag only if the test would be unreliable
 
-## Step 3 — Classify findings by severity
+## Step 3 - Classify findings by severity
 
 **Critical** (score = 0 if found):
 - Hardcoded secrets
@@ -81,7 +81,7 @@ After each Grep call, filter out hits from the directories excluded in Step 1 be
 - TODO/FIXME/HACK comments
 - Debug artifacts
 
-## Step 4 — Write REVIEW.md
+## Step 4 - Write REVIEW.md
 
 Create `REVIEW.md` in the project root using this exact structure:
 
@@ -142,24 +142,24 @@ status: clean | issues_found | skipped
 *Depth: quick*
 ```
 
-## Step 5 — Print result to chat
+## Step 5 - Print result to chat
 
-After writing REVIEW.md, print a one-line summary. Evaluate in order — first match wins:
+After writing REVIEW.md, print a one-line summary. Evaluate in order - first match wins:
 
-- `critical > 0` → `❌ BLOCKED — N critical issue(s) found. See REVIEW.md`
-- `warning > 0` → `⚠️  N warning(s) found. See REVIEW.md`
-- `info > 0` → `ℹ️  N info-level note(s). See REVIEW.md`
-- `total == 0` and files were reviewed → `✅ Pre-PR check passed — no issues found.`
-- No files were reviewed (status: skipped) → `⏭️  Skipped — no Python files in scope.`
+- `critical > 0` -> `[X] BLOCKED - N critical issue(s) found. See REVIEW.md`
+- `warning > 0` -> `[!]  N warning(s) found. See REVIEW.md`
+- `info > 0` -> `[i]  N info-level note(s). See REVIEW.md`
+- `total == 0` and files were reviewed -> `[OK] Pre-PR check passed - no issues found.`
+- No files were reviewed (status: skipped) -> `[skip]  Skipped - no Python files in scope.`
 
 ## Rules
 
 - **Never modify source files.** This skill is read-only. Only REVIEW.md is written.
 - **Always include line numbers.** Never write "somewhere in the file."
-- **Every Critical and Warning must have a concrete fix suggestion** in the `**Fix:**` field — `python-code-fixer` reads this field directly. Prefer a fenced code block over prose.
+- **Every Critical and Warning must have a concrete fix suggestion** in the `**Fix:**` field - `python-code-fixer` reads this field directly. Prefer a fenced code block over prose.
 - **Do not flag test files** unless the issue would make tests unreliable.
 - **`clean` and `skipped` are not the same.** Only use `clean` when files were
   actually reviewed and nothing was found.
 - **Preserve the finding ID scheme** (`CR-NN` / `WR-NN` / `IN-NN`) and the `**File:** path:line` format. The companion fixer's parser depends on both.
-- **Overwrite, don't append.** If `REVIEW.md` already exists, replace it — never merge with prior findings (the fixer treats the file as authoritative).
-- **Use the Write tool to produce REVIEW.md** — do not shell out to `echo`/`cat`/`Set-Content`.
+- **Overwrite, don't append.** If `REVIEW.md` already exists, replace it - never merge with prior findings (the fixer treats the file as authoritative).
+- **Use the Write tool to produce REVIEW.md** - do not shell out to `echo`/`cat`/`Set-Content`.

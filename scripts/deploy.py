@@ -24,7 +24,7 @@ Two channels, both fed from this one repo:
                   step builds the zip(s) into dist/.
 
 It can also generate a static, human-facing catalog (site/index.html) grouped
-by plugin/scope. The catalog is a read-only reference — it does NOT serve
+by plugin/scope. The catalog is a read-only reference - it does NOT serve
 skills to Claude. Host it on GitHub Pages; it regenerates from the repo.
 
 Usage:
@@ -133,7 +133,7 @@ def list_bundled_files(skill_dir: Path) -> list[Path]:
 
 
 # --------------------------------------------------------------------------- #
-# Channel: Claude Code  (validation gate — git is the transport)
+# Channel: Claude Code  (validation gate - git is the transport)
 # --------------------------------------------------------------------------- #
 def deploy_claude_code(plugin: dict, dry_run: bool) -> DeployResult:
     name = plugin.get("name", "?")
@@ -198,11 +198,11 @@ def deploy_claude_ai(plugin: dict, dry_run: bool, scopes: dict) -> DeployResult:
         built.append(zip_path.relative_to(ROOT).as_posix())
 
     return DeployResult(name, "claude_ai", True,
-                        f"[{scope}] built {', '.join(built)} — {note}")
+                        f"[{scope}] built {', '.join(built)} - {note}")
 
 
 # --------------------------------------------------------------------------- #
-# Catalog (static, human-facing reference — NOT a runtime skill server)
+# Catalog (static, human-facing reference - NOT a runtime skill server)
 # --------------------------------------------------------------------------- #
 def _html_escape(s: str) -> str:
     return (s.replace("&", "&amp;").replace("<", "&lt;")

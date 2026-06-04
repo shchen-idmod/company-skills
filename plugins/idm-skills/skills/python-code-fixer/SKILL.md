@@ -1,6 +1,6 @@
 ---
 name: python-code-fixer
-description: "Use this skill when applying fixes to Python 3 code review findings from REVIEW.md. Covers reading source files, applying intelligent fixes, committing each fix atomically, and producing a REVIEW-FIX.md report. Python 3 only — do NOT use for other languages, initial code review, test running, or deployment tasks."
+description: "Use this skill when applying fixes to Python 3 code review findings from REVIEW.md. Covers reading source files, applying intelligent fixes, committing each fix atomically, and producing a REVIEW-FIX.md report. Python 3 only - do NOT use for other languages, initial code review, test running, or deployment tasks."
 allowed-tools: Read, Edit, Write, Grep, Glob, Bash, PowerShell
 ---
 
@@ -14,16 +14,16 @@ Applies fixes to Python 3 code review findings from `REVIEW.md`. Produces a `REV
 
 This skill runs in one of two modes:
 
-- **Standalone Mode (default)** — invoked directly by a user. Reads `./REVIEW.md` from the project root (matching the output of the companion `python-code-reviewer` skill), writes `./REVIEW-FIX.md`, edits files in the current working tree, and does **not** create a worktree. Skip Step 1 entirely.
-- **Phase Mode** — invoked by an orchestrator that supplies a `<config>` block with `phase_dir`, `padded_phase`, `review_path`, `fix_report_path`. Runs the full worktree-based flow in Step 1.
+- **Standalone Mode (default)** - invoked directly by a user. Reads `./REVIEW.md` from the project root (matching the output of the companion `python-code-reviewer` skill), writes `./REVIEW-FIX.md`, edits files in the current working tree, and does **not** create a worktree. Skip Step 1 entirely.
+- **Phase Mode** - invoked by an orchestrator that supplies a `<config>` block with `phase_dir`, `padded_phase`, `review_path`, `fix_report_path`. Runs the full worktree-based flow in Step 1.
 
 Detect the mode in Step 2 by checking whether a `<config>` block is present in the prompt.
 
 > **Scope:** Python 3 source files (`.py`) only. Skip any finding that targets a non-Python file and mark it as "skipped: non-Python file, out of scope".
 
-**Job:** Read `REVIEW.md` findings → fix source code intelligently (not blindly) → commit each fix atomically → produce `REVIEW-FIX.md` report.
+**Job:** Read `REVIEW.md` findings -> fix source code intelligently (not blindly) -> commit each fix atomically -> produce `REVIEW-FIX.md` report.
 
-> **CRITICAL — Mandatory Initial Read:** If the prompt contains a `<required_reading>` block, use the `Read` tool to load every file listed there before any other action. This is primary context.
+> **CRITICAL - Mandatory Initial Read:** If the prompt contains a `<required_reading>` block, use the `Read` tool to load every file listed there before any other action. This is primary context.
 
 ---
 
@@ -47,8 +47,8 @@ Before fixing code, discover project context:
 The REVIEW.md fix suggestion is **guidance**, not a patch to apply blindly.
 
 **For each finding:**
-1. **Read the actual source file** at the cited line (plus surrounding context — at least +/- 10 lines)
-2. **Understand the current code state** — check if code matches what reviewer saw
+1. **Read the actual source file** at the cited line (plus surrounding context - at least +/- 10 lines)
+2. **Understand the current code state** - check if code matches what reviewer saw
 3. **Adapt the fix suggestion** to actual code if it has changed or differs from review context
 4. **Apply the fix** using Edit tool (preferred) for targeted changes, or Write tool for full rewrites
 5. **Verify the fix** using the 3-tier verification strategy (see below)
@@ -76,7 +76,7 @@ Before editing **any** file for a finding, establish safe rollback capability.
 4. **On verification failure:**
    - Run `git checkout -- {file}` for EACH file in `touched_files`.
    - This is safe: the fix has NOT been committed yet. `git checkout --` reverts only the uncommitted in-progress change and does not affect commits from prior findings.
-   - **DO NOT use Write tool for rollback** — a partial write on tool failure leaves the file corrupted with no recovery path.
+   - **DO NOT use Write tool for rollback** - a partial write on tool failure leaves the file corrupted with no recovery path.
 5. **After rollback:**
    - Re-read the file and confirm it matches pre-fix state.
    - Mark finding as "skipped: fix caused errors, rolled back".
@@ -91,12 +91,12 @@ Before editing **any** file for a finding, establish safe rollback capability.
 
 After applying each fix, verify correctness in 3 tiers.
 
-### Tier 1 — Minimum (ALWAYS REQUIRED)
+### Tier 1 - Minimum (ALWAYS REQUIRED)
 - Re-read the modified file section (at least the lines affected by the fix)
 - Confirm the fix text is present
 - Confirm surrounding code is intact (no corruption)
 
-### Tier 2 — Preferred (when available)
+### Tier 2 - Preferred (when available)
 Run the Python 3 syntax check on the modified `.py` file. Try `python3` first, then `python` (Windows typically only ships `python`):
 
 POSIX shells:
@@ -112,11 +112,11 @@ if ($py) { & $py.Source -m py_compile {file}; if ($LASTEXITCODE -eq 0) { "OK" } 
 ```
 
 **Scoping rules:**
-- Only fail if the syntax error is in the file you just modified. Errors in other files are pre-existing — ignore them.
+- Only fail if the syntax error is in the file you just modified. Errors in other files are pre-existing - ignore them.
 - If the check fails with errors that existed before your edit: proceed to commit.
-- If neither `python3` nor `python` is available: fall back to Tier 3 — do NOT rollback.
+- If neither `python3` nor `python` is available: fall back to Tier 3 - do NOT rollback.
 
-### Tier 3 — Fallback
+### Tier 3 - Fallback
 If no Python interpreter is on PATH (e.g., restricted environment):
 - Accept Tier 1 result
 - Note in REVIEW-FIX.md: "syntax check skipped: python interpreter not available"
@@ -138,7 +138,7 @@ ID matches: `CR-\d+` or `BL-\d+` (Critical), `WR-\d+` (Warning), or `IN-\d+` (In
 
 ### Required Fields
 
-- **File:** primary file path — format: `path/to/file.ext:42` or `path/to/file.ext`
+- **File:** primary file path - format: `path/to/file.ext:42` or `path/to/file.ext`
 - **Issue:** problem description
 - **Fix:** section extends from `**Fix:**` to next `### ` heading or end of file
 
@@ -154,13 +154,13 @@ The **Fix:** section may contain:
    ````
    Extract code from triple-backtick fences.
 
-   > **IMPORTANT:** Code fences may contain markdown-like syntax (headings, horizontal rules). Always track fence open/close state when scanning for section boundaries. Content between ``` delimiters is opaque — never parse it as finding structure.
+   > **IMPORTANT:** Code fences may contain markdown-like syntax (headings, horizontal rules). Always track fence open/close state when scanning for section boundaries. Content between ``` delimiters is opaque - never parse it as finding structure.
 
 2. **Multiple file references:**
-   "In `module_a.py`, change X; in `module_b.py`, change Y" — parse ALL file references into the finding's `files` array.
+   "In `module_a.py`, change X; in `module_b.py`, change Y" - parse ALL file references into the finding's `files` array.
 
 3. **Prose-only descriptions:**
-   "Add null check before accessing property" — interpret intent and apply fix.
+   "Add null check before accessing property" - interpret intent and apply fix.
 
 ### Parsing Rules
 
@@ -168,14 +168,14 @@ The **Fix:** section may contain:
 - Handle missing line numbers gracefully (line: null)
 - If Fix section is empty or just says "see above", use Issue description as guidance
 - Stop parsing at next `### ` heading or `---` footer
-- When scanning for `### ` boundaries, treat content inside triple-backtick fences as opaque — do NOT match `### ` or `---` inside fenced blocks
+- When scanning for `### ` boundaries, treat content inside triple-backtick fences as opaque - do NOT match `### ` or `---` inside fenced blocks
 - `### ` headings inside a code fence (e.g., example markdown output) are NOT finding boundaries
 
 ---
 
 ## Execution Flow
 
-### Step 1 — Setup Worktree (Phase Mode only — skip in Standalone)
+### Step 1 - Setup Worktree (Phase Mode only - skip in Standalone)
 
 > **Standalone Mode:** Skip this entire step. Operate on the current working tree, in the current branch. Proceed directly to Step 2.
 >
@@ -183,9 +183,9 @@ The **Fix:** section may contain:
 
 This skill, when run in Phase Mode, runs as a background process that makes commits. Operating on the main working tree would race the foreground session. Every Phase-Mode instance runs in its own isolated worktree.
 
-> The bash block below is POSIX-only (uses `mktemp`, `awk`, `sed`, `node`). It is intended for the orchestrator's Linux/macOS environment. Do **not** attempt to translate it to PowerShell for direct user runs — Standalone Mode skips this step entirely.
+> The bash block below is POSIX-only (uses `mktemp`, `awk`, `sed`, `node`). It is intended for the orchestrator's Linux/macOS environment. Do **not** attempt to translate it to PowerShell for direct user runs - Standalone Mode skips this step entirely.
 
-The cleanup tail (commit fixes → remove worktree → drop recovery sentinel) MUST be transactional. If the process is interrupted between the last commit and `git worktree remove`, a discoverable recovery sentinel must be left behind for future cleanup.
+The cleanup tail (commit fixes -> remove worktree -> drop recovery sentinel) MUST be transactional. If the process is interrupted between the last commit and `git worktree remove`, a discoverable recovery sentinel must be left behind for future cleanup.
 
 ```bash
 branch=$(git branch --show-current)
@@ -244,13 +244,13 @@ cd "$wt"
 2. Resolve current branch: `branch=$(git branch --show-current)`. If empty (detached HEAD), print error and exit.
 3. **Recovery check (#2839, #2990):** If `${phase_dir}/.review-fix-recovery-pending.json` exists, parse it, attempt to remove the orphan worktree (best-effort, `--force`), delete the stale `reviewfix_branch` (best-effort, `git branch -D`), then delete the stale sentinel.
 4. Create unique worktree path: `wt=$(mktemp -d "/tmp/sv-${padded_phase}-reviewfix-XXXXXX")`.
-5. Run `git worktree add -b "$reviewfix_branch" "$wt" "$branch"` — attaches to a NEW branch so it coexists with the user's checkout (#2990).
+5. Run `git worktree add -b "$reviewfix_branch" "$wt" "$branch"` - attaches to a NEW branch so it coexists with the user's checkout (#2990).
 6. **Write recovery sentinel** at `${phase_dir}/.review-fix-recovery-pending.json` containing `{worktree_path, branch, reviewfix_branch, padded_phase, started_at}`. Only write AFTER `git worktree add` succeeds.
 7. All subsequent reads, edits, and commits happen inside `$wt`.
 
 **If `git worktree add` fails:** surface the error and exit. Do not force-remove the path. Do not write the sentinel.
 
-**Cleanup tail (transactional — ALWAYS, even on failure):**
+**Cleanup tail (transactional - ALWAYS, even on failure):**
 
 ```bash
 # Step 1: fast-forward $branch to capture agent commits
@@ -278,31 +278,31 @@ rm -f "$sentinel"
 
 ---
 
-### Step 2 — Load Context
+### Step 2 - Load Context
 
 1. **Read mandatory files:** Load all files from `<required_reading>` block if present.
 2. **Detect mode and resolve config:**
 
-   *If a `<config>` block is present in the prompt* → **Phase Mode**. Extract:
+   *If a `<config>` block is present in the prompt* -> **Phase Mode**. Extract:
    - `phase_dir`: e.g., `.planning/phases/02-code-review-command`
    - `padded_phase`: e.g., `"02"`
    - `review_path`: e.g., `.planning/phases/02-code-review-command/02-REVIEW.md`
    - `fix_scope`: `"critical_warning"` (default) or `"all"` (includes Info findings)
    - `fix_report_path`: e.g., `.planning/phases/02-code-review-command/02-REVIEW-FIX.md`
 
-   *Otherwise* → **Standalone Mode**. Use these defaults (no `<config>` required):
+   *Otherwise* -> **Standalone Mode**. Use these defaults (no `<config>` required):
    - `review_path = ./REVIEW.md` (matches output of the `python-code-reviewer` skill)
    - `fix_report_path = ./REVIEW-FIX.md`
    - `fix_scope = "critical_warning"`
    - `phase_dir` and `padded_phase` are **not used** in Standalone Mode.
 
-3. **Read REVIEW.md:** Use the `Read` tool on `{review_path}` (do not shell out to `cat` — it is not cross-platform).
-4. **Parse frontmatter status field:** If status is `"clean"` or `"skipped"`, exit with message: "No issues to fix — REVIEW.md status is {status}." Do NOT create REVIEW-FIX.md. Exit code 0.
+3. **Read REVIEW.md:** Use the `Read` tool on `{review_path}` (do not shell out to `cat` - it is not cross-platform).
+4. **Parse frontmatter status field:** If status is `"clean"` or `"skipped"`, exit with message: "No issues to fix - REVIEW.md status is {status}." Do NOT create REVIEW-FIX.md. Exit code 0.
 5. **Load project context:** Read `./CLAUDE.md` and check for `.claude/skills/` or `.agents/skills/`.
 
 ---
 
-### Step 3 — Parse Findings
+### Step 3 - Parse Findings
 
 1. **Extract findings from REVIEW.md body** using the finding parser rules above.
 
@@ -326,7 +326,7 @@ rm -f "$sentinel"
 
 ---
 
-### Step 4 — Apply Fixes
+### Step 4 - Apply Fixes
 
 For each finding in sorted order:
 
@@ -389,12 +389,12 @@ COMMIT_HASH=$(git rev-parse --short HEAD)
 
 ```bash
 FIXED_COUNT=$((FIXED_COUNT + 1))   # correct
-# ((FIXED_COUNT++))                # WRONG — fails under set -e
+# ((FIXED_COUNT++))                # WRONG - fails under set -e
 ```
 
 ---
 
-### Step 5 — Write Fix Report
+### Step 5 - Write Fix Report
 
 **Create `REVIEW-FIX.md`** at `fix_report_path`.
 
@@ -432,7 +432,7 @@ Status values:
 
 ## Fixed Issues
 
-{If none, write: "None — all findings were skipped."}
+{If none, write: "None - all findings were skipped."}
 
 ### {finding_id}: {title}
 
@@ -457,26 +457,26 @@ _Fixer: Claude (python-code-fixer)_
 _Iteration: {N}_
 ```
 
-> **DO NOT commit REVIEW-FIX.md** — the orchestrator handles that commit. This skill only commits individual per-finding fix changes.
+> **DO NOT commit REVIEW-FIX.md** - the orchestrator handles that commit. This skill only commits individual per-finding fix changes.
 
 ---
 
 ## Critical Rules
 
-- **Phase Mode only — always run inside the isolated worktree** set up via `git worktree add -b "$reviewfix_branch" "$wt" "$branch"`. Using `mktemp` ensures concurrent runs don't collide. Commits advance `$reviewfix_branch`; the cleanup tail fast-forwards `$branch` to capture them. **Standalone Mode** operates on the current working tree and does **not** create a worktree.
-- **Phase Mode only — always run the transactional cleanup tail in order**: (1) `merge --ff-only`, (2) `worktree remove`, (3) `branch -D` (only if ff succeeded), (4) `rm -f "$sentinel"`. Never reorder. Does not apply in Standalone Mode.
-- **Always use the Write tool to create files** — never use `Bash(cat << 'EOF')`, heredocs, or `node -e 'fs.writeFileSync(...)'` to materialize files. (The Phase-Mode sentinel write is the one orchestrator-internal exception; user-visible artifacts always go through the Write tool.)
-- **Read the actual source file** before applying any fix — never blindly apply REVIEW.md suggestions.
-- **Record touched files** before every fix attempt — this is your rollback list.
-- **Commit each fix atomically** — one commit per finding, listing ALL modified files.
+- **Phase Mode only - always run inside the isolated worktree** set up via `git worktree add -b "$reviewfix_branch" "$wt" "$branch"`. Using `mktemp` ensures concurrent runs don't collide. Commits advance `$reviewfix_branch`; the cleanup tail fast-forwards `$branch` to capture them. **Standalone Mode** operates on the current working tree and does **not** create a worktree.
+- **Phase Mode only - always run the transactional cleanup tail in order**: (1) `merge --ff-only`, (2) `worktree remove`, (3) `branch -D` (only if ff succeeded), (4) `rm -f "$sentinel"`. Never reorder. Does not apply in Standalone Mode.
+- **Always use the Write tool to create files** - never use `Bash(cat << 'EOF')`, heredocs, or `node -e 'fs.writeFileSync(...)'` to materialize files. (The Phase-Mode sentinel write is the one orchestrator-internal exception; user-visible artifacts always go through the Write tool.)
+- **Read the actual source file** before applying any fix - never blindly apply REVIEW.md suggestions.
+- **Record touched files** before every fix attempt - this is your rollback list.
+- **Commit each fix atomically** - one commit per finding, listing ALL modified files.
 - **Use Edit tool (preferred)** over Write tool for targeted changes.
 - **Verify each fix** using the 3-tier strategy.
-- **Skip findings that cannot be applied cleanly** — do not force broken fixes. Mark as skipped with a clear reason.
-- **Rollback using `git checkout -- {file}`** — atomic and safe. Do NOT use Write tool for rollback.
-- **Do not modify files unrelated to the finding** — scope each fix narrowly.
-- **Do not run the full test suite** between fixes — handled by the verifier phase later.
+- **Skip findings that cannot be applied cleanly** - do not force broken fixes. Mark as skipped with a clear reason.
+- **Rollback using `git checkout -- {file}`** - atomic and safe. Do NOT use Write tool for rollback.
+- **Do not modify files unrelated to the finding** - scope each fix narrowly.
+- **Do not run the full test suite** between fixes - handled by the verifier phase later.
 - **Respect CLAUDE.md project conventions** during fixes.
-- **Do not leave uncommitted changes** — if commit fails after successful edit, rollback and mark as skipped.
+- **Do not leave uncommitted changes** - if commit fails after successful edit, rollback and mark as skipped.
 - **Do not create new files** unless the fix explicitly requires it (e.g., a missing import file). Document in REVIEW-FIX.md if a new file was created.
 
 ---
@@ -485,10 +485,10 @@ _Iteration: {N}_
 
 Fixes are committed per-finding. Implications:
 
-- **Mid-run crash:** Some fix commits may already exist in git history. This is by design — each commit is self-contained and correct. If the agent crashes before writing REVIEW-FIX.md, commits are still valid.
-- **Agent failure before REVIEW-FIX.md:** Workflow detects the missing report and alerts: "Agent failed. Some fix commits may already exist — check `git log`."
+- **Mid-run crash:** Some fix commits may already exist in git history. This is by design - each commit is self-contained and correct. If the agent crashes before writing REVIEW-FIX.md, commits are still valid.
+- **Agent failure before REVIEW-FIX.md:** Workflow detects the missing report and alerts: "Agent failed. Some fix commits may already exist - check `git log`."
 - **REVIEW-FIX.md accuracy:** Report reflects what was actually fixed vs skipped at time of writing.
-- **Idempotency:** Re-running the fixer on the same REVIEW.md may produce different results if code has changed. Not a bug — the fixer adapts to current code state, not historical review context.
+- **Idempotency:** Re-running the fixer on the same REVIEW.md may produce different results if code has changed. Not a bug - the fixer adapts to current code state, not historical review context.
 - **Partial automation:** Some findings may be auto-fixable, others require human judgment. The skip-and-log pattern allows partial automation.
 
 ---

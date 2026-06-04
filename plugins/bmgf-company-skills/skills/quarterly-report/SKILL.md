@@ -27,7 +27,7 @@ Trigger this skill when **both** of these are true:
    summary, board package, exec memo, or close-out doc.
 
 If the user wants ad-hoc analysis on the GL data without quarterly framing,
-do not use this skill — answer directly using standard data-analysis tools.
+do not use this skill - answer directly using standard data-analysis tools.
 
 ## Workflow
 
@@ -41,14 +41,14 @@ do not use this skill — answer directly using standard data-analysis tools.
    accounting rules (debit/credit signing, account grouping, period
    filtering) deterministically.
 4. Load `references/narrative-template.md` for the expected document
-   structure and tone. Follow it closely — finance leadership expects
+   structure and tone. Follow it closely - finance leadership expects
    consistency quarter to quarter.
 5. Generate the narrative inline. The user can ask for a PDF afterward
    using the `pdf` skill if needed; don't create a PDF unless asked.
 
 ## Boundaries
 
-- Don't include forecasts or guidance — this skill is for historical
+- Don't include forecasts or guidance - this skill is for historical
   reporting only. If the user asks for forward-looking content, decline
   and suggest they use a separate forecasting workflow.
 - Don't aggregate across fiscal years unless explicitly requested. The
@@ -60,7 +60,7 @@ do not use this skill — answer directly using standard data-analysis tools.
 ## Failure modes
 
 - If the GL covers a date range narrower than the requested quarter,
-  surface that gap to the user before proceeding — don't silently
+  surface that gap to the user before proceeding - don't silently
   generate a partial report.
 - If revenue or net income comes out negative when prior quarters were
   positive, flag this prominently in the executive summary. Don't bury it.
