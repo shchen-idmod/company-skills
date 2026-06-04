@@ -61,7 +61,7 @@ class DeployResult:
 # --------------------------------------------------------------------------- #
 def load_plugins() -> list[dict]:
     """Plugin entries from marketplace.json (name, description, source, ...)."""
-    manifest = json.loads(MARKETPLACE.read_text())
+    manifest = json.loads(MARKETPLACE.read_text(encoding="utf-8"))
     return manifest.get("plugins", [])
 
 
@@ -69,7 +69,7 @@ def load_scopes() -> dict:
     """Plugin-name -> scope string (e.g. 'org-wide', 'group:IDM')."""
     if not SCOPES.is_file():
         return {}
-    data = json.loads(SCOPES.read_text())
+    data = json.loads(SCOPES.read_text(encoding="utf-8"))
     return {k: v for k, v in data.items() if not k.startswith("_")}
 
 
@@ -231,19 +231,34 @@ def build_catalog(dry_run: bool, repo_url: str | None = None) -> DeployResult:
             return f"{repo_url.rstrip('/')}/blob/main/{rel_repo_path}"
         return f"../{rel_repo_path}"
 
+    def slug(s: str) -> str:
+        return "".join(c if c.isalnum() else "-" for c in s.lower()).strip("-")
+
+    nav_items = []
     cards = []
     for plugin in plugins:
         name = plugin.get("name", "?")
+        pid = slug(name)
         scope = scopes.get(name, "unspecified")
         badge = "org-wide" if scope == "org-wide" else scope
+        skill_dirs = plugin_skill_dirs(plugin)
+
+        # Sidebar: plugin link + its skills as sub-links.
+        sub = "".join(
+            f'<a class="nav-skill" href="#{pid}-{slug(s.name)}">{_html_escape(s.name)}</a>'
+            for s in skill_dirs
+        )
+        nav_items.append(
+            f'<div class="nav-group"><a class="nav-plugin" href="#{pid}">'
+            f'{_html_escape(name)}</a><span class="nav-badge">{_html_escape(badge)}</span>'
+            f'{sub}</div>'
+        )
+
         rows = []
-        for sdir in plugin_skill_dirs(plugin):
+        for sdir in skill_dirs:
             sname = sdir.name
             meta = read_frontmatter(sdir)
             desc = meta.get("description", "(no description)")
-
-            skill_md_rel = (sdir / "SKILL.md").relative_to(ROOT).as_posix()
-            skill_md_href = _html_escape(file_link(skill_md_rel))
 
             files = list_bundled_files(sdir)
             files_html = ""
@@ -260,13 +275,13 @@ def build_catalog(dry_run: bool, repo_url: str | None = None) -> DeployResult:
                 )
 
             rows.append(
-                f'<div class="skill"><div class="skill-name">{_html_escape(sname)}'
-                f'<a class="skill-md" href="{skill_md_href}">SKILL.md</a></div>'
+                f'<div class="skill" id="{pid}-{slug(sname)}">'
+                f'<div class="skill-name">{_html_escape(sname)}</div>'
                 f'<div class="skill-desc">{_html_escape(desc)}</div>'
                 f'{files_html}</div>'
             )
         cards.append(
-            f'<section class="plugin"><h2>{_html_escape(name)}'
+            f'<section class="plugin" id="{pid}"><h2>{_html_escape(name)}'
             f'<span class="badge">{_html_escape(badge)}</span></h2>'
             f'<p class="plugin-desc">{_html_escape(plugin.get("description", ""))}</p>'
             f'{"".join(rows)}</section>'
@@ -277,54 +292,102 @@ def build_catalog(dry_run: bool, repo_url: str | None = None) -> DeployResult:
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Company Skills Catalog</title>
 <style>
-  :root {{ --accent:#2E75B6; --ink:#1f1f1f; --muted:#595959; --line:#e3e3e3; }}
+  :root {{
+    --brand:#1A1446;        /* deep indigo - primary UI/ink accent */
+    --brand-2:#3A32A6;      /* lighter indigo for links/hover */
+    --gold:#EBCB00;         /* brand gold accent */
+    --ink:#1A1446; --muted:#5B5B6B; --line:#e4e4ec;
+    --bg:#ffffff; --side:#f7f7fb; --code:#f2f2f7;
+  }}
   * {{ box-sizing:border-box; }}
-  body {{ font:16px/1.5 -apple-system,Segoe UI,Roboto,Arial,sans-serif;
-          color:var(--ink); max-width:880px; margin:0 auto; padding:40px 20px; }}
-  header h1 {{ margin:0 0 4px; font-size:30px; }}
-  header p {{ margin:0 0 8px; color:var(--muted); }}
-  .note {{ background:#f4f7fb; border-left:3px solid var(--accent);
-           padding:10px 14px; font-size:14px; color:var(--muted); border-radius:4px; }}
-  .plugin {{ margin:32px 0; }}
-  .plugin h2 {{ font-size:20px; color:var(--accent); border-bottom:2px solid var(--accent);
+  html {{ scroll-behavior:smooth; }}
+  body {{ font:16px/1.6 "Noto Sans","Segoe UI",-apple-system,Roboto,Arial,sans-serif;
+          color:var(--ink); margin:0; background:var(--bg); }}
+  a {{ color:var(--brand-2); }}
+
+  /* layout: fixed sidebar + scrollable content */
+  .layout {{ display:flex; align-items:flex-start; }}
+  .sidebar {{ position:sticky; top:0; height:100vh; overflow-y:auto;
+              flex:0 0 270px; background:var(--side);
+              border-right:1px solid var(--line); padding:28px 20px; }}
+  .content {{ flex:1 1 auto; max-width:820px; padding:40px 36px; }}
+
+  /* sidebar brand + nav */
+  .brand-bar {{ font-weight:800; font-size:18px; color:var(--brand);
+                letter-spacing:-.01em; margin:0 0 4px; }}
+  .brand-bar .tick {{ display:inline-block; width:10px; height:18px;
+                      background:var(--gold); margin-right:8px; vertical-align:-3px;
+                      border-radius:2px; }}
+  .brand-sub {{ font-size:12px; color:var(--muted); margin:0 0 22px; }}
+  .nav-group {{ margin:0 0 16px; }}
+  .nav-plugin {{ display:inline; font-weight:700; font-size:14px;
+                 text-decoration:none; color:var(--brand); }}
+  .nav-plugin:hover {{ color:var(--brand-2); }}
+  .nav-badge {{ display:inline-block; font-size:9px; font-weight:700; color:var(--brand);
+                background:var(--gold); padding:1px 6px; border-radius:8px;
+                margin-left:6px; text-transform:uppercase; letter-spacing:.04em; }}
+  .nav-skill {{ display:block; font-size:13px; color:var(--muted);
+                text-decoration:none; padding:3px 0 3px 18px; font-family:ui-monospace,Consolas,monospace; }}
+  .nav-skill:hover {{ color:var(--brand-2); }}
+
+  /* content */
+  header h1 {{ margin:0 0 4px; font-size:30px; color:var(--brand); letter-spacing:-.01em; }}
+  header .lead {{ margin:0 0 10px; color:var(--muted); }}
+  .note {{ background:#fbf6d6; border-left:4px solid var(--gold);
+           padding:12px 16px; font-size:14px; color:#4a4632; border-radius:4px; margin-bottom:8px; }}
+  .plugin {{ margin:40px 0; scroll-margin-top:24px; }}
+  .plugin h2 {{ font-size:21px; color:var(--brand); border-bottom:2px solid var(--gold);
                 padding-bottom:6px; display:flex; align-items:center; gap:10px; }}
-  .badge {{ font-size:12px; font-weight:600; color:#fff; background:var(--accent);
-            padding:2px 8px; border-radius:10px; text-transform:uppercase; letter-spacing:.04em; }}
+  .badge {{ font-size:11px; font-weight:700; color:var(--brand); background:var(--gold);
+            padding:2px 9px; border-radius:10px; text-transform:uppercase; letter-spacing:.04em; }}
   .plugin-desc {{ color:var(--muted); margin:8px 0 16px; }}
-  .skill {{ border:1px solid var(--line); border-radius:6px; padding:12px 14px; margin:8px 0; }}
-  .skill-name {{ font-weight:600; font-family:ui-monospace,Consolas,monospace;
-                 display:flex; align-items:center; gap:10px; }}
-  .skill-md {{ font-weight:600; font-size:12px; color:var(--accent);
-               text-decoration:none; border:1px solid var(--accent);
-               padding:1px 7px; border-radius:10px; }}
-  .skill-md:hover {{ background:var(--accent); color:#fff; }}
+  .skill {{ border:1px solid var(--line); border-radius:8px; padding:14px 16px;
+            margin:10px 0; scroll-margin-top:24px; }}
+  .skill-name {{ font-weight:700; font-family:ui-monospace,Consolas,monospace; color:var(--brand); }}
   .skill-desc {{ color:var(--muted); font-size:14px; margin-top:4px; }}
-  .files {{ margin-top:10px; padding-top:8px; border-top:1px dashed var(--line); }}
-  .files-label {{ font-size:12px; font-weight:600; color:var(--muted);
+  .files {{ margin-top:12px; padding-top:10px; border-top:1px dashed var(--line); }}
+  .files-label {{ font-size:11px; font-weight:700; color:var(--muted);
                   text-transform:uppercase; letter-spacing:.03em; }}
   .files ul {{ margin:6px 0 0; padding-left:18px; }}
   .files li {{ font-family:ui-monospace,Consolas,monospace; font-size:13px; margin:2px 0; }}
-  .files a {{ color:var(--accent); text-decoration:none; }}
+  .files a {{ text-decoration:none; }}
   .files a:hover {{ text-decoration:underline; }}
-  footer {{ margin-top:40px; color:var(--muted); font-size:13px;
-            border-top:1px solid var(--line); padding-top:12px; }}
+  code {{ background:var(--code); padding:1px 5px; border-radius:4px; font-size:13px; }}
+  footer {{ margin-top:48px; color:var(--muted); font-size:13px;
+            border-top:1px solid var(--line); padding-top:14px; }}
+
+  @media (max-width:760px) {{
+    .layout {{ flex-direction:column; }}
+    .sidebar {{ position:static; height:auto; flex-basis:auto; width:100%;
+                border-right:none; border-bottom:1px solid var(--line); }}
+    .content {{ padding:28px 20px; }}
+  }}
 </style></head>
 <body>
-<header>
-  <h1>Company Skills Catalog</h1>
-  <p>{total} skills across {len(plugins)} plugin(s). Generated from the
-     source-of-truth repository.</p>
-  <p class="note">This page is a human reference only. Claude receives these
-     skills through the plugin marketplace (Claude Code) and admin-provisioned
-     skills (Claude.ai), not from this site.</p>
-</header>
-{"".join(cards)}
-<footer>Regenerate with <code>python scripts/deploy.py --catalog</code>.</footer>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand-bar"><span class="tick"></span>Skills Catalog</div>
+    <div class="brand-sub">Gates Foundation - internal</div>
+    <nav>{"".join(nav_items)}</nav>
+  </aside>
+  <main class="content">
+    <header>
+      <h1>Company Skills Catalog</h1>
+      <p class="lead">{total} skills across {len(plugins)} plugin(s). Generated
+         from the source-of-truth repository.</p>
+      <p class="note">This page is a human reference only. Claude receives these
+         skills through the plugin marketplace (Claude Code) and
+         admin-provisioned skills (Claude.ai), not from this site.</p>
+    </header>
+    {"".join(cards)}
+    <footer>Regenerate with <code>python scripts/deploy.py --catalog</code>.</footer>
+  </main>
+</div>
 </body></html>
 """
 
     SITE.mkdir(exist_ok=True)
-    out.write_text(html)
+    out.write_text(html, encoding="utf-8")
     return DeployResult("catalog", "catalog", True,
                         f"wrote {rel} ({len(plugins)} plugins, {total} skills)")
 
